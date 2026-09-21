@@ -24,9 +24,10 @@ clap_complete = "4.5"
 comfy-table = "7.2"
 dirs = "6.0"
 futures-util = "0.3"
-rand = "0.9"
+rand = "0.8"
 reqwest = { version = "0.13", default-features = false, features = ["json", "rustls"] }
-russh = { version = "0.63.3", features = ["async-trait", "flate2"] }
+russh = { version = "=0.37.1", default-features = false, features = ["openssl", "flate2"] }
+russh-keys = { version = "=0.37.1", default-features = false, features = ["openssl"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 serde_yaml = "0.9"
