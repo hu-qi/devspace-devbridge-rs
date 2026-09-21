@@ -27,7 +27,7 @@ jobs:
         working-directory: cli
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.85.0
+      - uses: dtolnay/rust-toolchain@1.89.0
         with:
           components: rustfmt, clippy
       - uses: Swatinem/rust-cache@v2
@@ -68,6 +68,6 @@ jobs:
         working-directory: cli
     steps:
       - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@1.85.0
+      - uses: dtolnay/rust-toolchain@1.89.0
       - uses: taiki-e/install-action@cargo-audit
       - run: cargo audit
