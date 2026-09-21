@@ -163,10 +163,10 @@ impl ApiClient {
         let status = resp.status();
         let bytes = resp.bytes().await?;
         if !status.is_success() {
-            if let Ok(env) = serde_json::from_slice::<ErrorEnvelope>(&bytes) {
-                if let Some(e) = env.error {
-                    bail!("API {}: {}", e.code, e.message);
-                }
+            if let Ok(env) = serde_json::from_slice::<ErrorEnvelope>(&bytes)
+                && let Some(e) = env.error
+            {
+                bail!("API {}: {}", e.code, e.message);
             }
             bail!(
                 "API request failed: HTTP {}: {}",
@@ -231,10 +231,10 @@ impl ApiClient {
         exp: Option<i32>,
     ) -> Result<CreatedTunnel> {
         validate_name(name)?;
-        if let Some(v) = exp {
-            if !(1..=720).contains(&v) {
-                bail!("expiration must be 1..=720 hours");
-            }
+        if let Some(v) = exp
+            && !(1..=720).contains(&v)
+        {
+            bail!("expiration must be 1..=720 hours");
         }
         let payload = serde_json::to_value(CreateTunnel {
             name,
@@ -255,10 +255,10 @@ impl ApiClient {
         if let Some(v) = name {
             validate_name(v)?;
         }
-        if let Some(v) = exp {
-            if !(1..=720).contains(&v) {
-                bail!("expiration must be 1..=720 hours");
-            }
+        if let Some(v) = exp
+            && !(1..=720).contains(&v)
+        {
+            bail!("expiration must be 1..=720 hours");
         }
         let payload = serde_json::to_value(UpdateTunnel {
             name,
