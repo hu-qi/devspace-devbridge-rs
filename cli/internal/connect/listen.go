@@ -8,7 +8,9 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"os/signal"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/coder/websocket"
@@ -21,7 +23,8 @@ type relayPortMessage struct {
 }
 
 func Listen(tunnelID string, ports []int, jwtToken string, apiKey string) {
-	ctx := context.Background()
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
 
 	header, subprotocols := buildWSHeader(jwtToken, apiKey)
 	header.Set("Cookie", "APP_COOKIE=7")

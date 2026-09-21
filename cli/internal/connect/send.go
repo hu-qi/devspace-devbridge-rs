@@ -45,8 +45,10 @@ func (f *listenerFactory) listenOnRandomPort(localIPAddress string, remotePort, 
 		return nil, err
 	}
 	actualPort := listener.Addr().(*net.TCPAddr).Port
+	f.mu.Lock()
 	f.portOverrides[remotePort] = actualPort
 	f.listeners = append(f.listeners, listener)
+	f.mu.Unlock()
 	f.addForwarding(fmt.Sprintf("Forwarding localhost: %s%d%s -> tunnel port: %s%d%s (port %s%d%s in use)\n",
 		colorCyan, actualPort, colorReset, colorCyan, remotePort, colorReset, colorYellow, originalPort, colorReset))
 	return listener, nil
@@ -58,10 +60,11 @@ func (f *listenerFactory) CreateTCPListener(
 	localPort int,
 	canChangeLocalPort bool,
 ) (net.Listener, error) {
-
+	f.mu.Lock()
 	if override, ok := f.portOverrides[remotePort]; ok {
 		localPort = override
 	}
+	f.mu.Unlock()
 
 	listener, err := net.Listen("tcp", net.JoinHostPort(localIPAddress, strconv.Itoa(localPort)))
 	if err != nil {
@@ -70,8 +73,10 @@ func (f *listenerFactory) CreateTCPListener(
 		}
 		return nil, fmt.Errorf("port %d is already in use: %w", localPort, err)
 	}
+	f.mu.Lock()
 	f.portOverrides[remotePort] = localPort
 	f.listeners = append(f.listeners, listener)
+	f.mu.Unlock()
 	f.addForwarding(fmt.Sprintf("Forwarding localhost: %s%d%s -> tunnel port: %s%d%s\n",
 		colorCyan, localPort, colorReset, colorCyan, remotePort, colorReset))
 	return listener, nil
