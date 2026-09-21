@@ -43,10 +43,7 @@ pub(crate) async fn dial(config: &TunnelConfig, host_mode: bool) -> Result<WsIo>
 
     match &config.auth {
         TunnelAuth::Token(token) => {
-            request = request.header(
-                "Sec-WebSocket-Protocol",
-                format!("devbridge-v1, {token}"),
-            );
+            request = request.header("Sec-WebSocket-Protocol", format!("devbridge-v1, {token}"));
         }
         TunnelAuth::ApiKey(api_key) => {
             request = request

@@ -14,7 +14,11 @@ use devbridge_tunnel::{TunnelAuth, TunnelConfig, connect, host};
 use tracing_subscriber::EnvFilter;
 
 #[derive(Parser, Debug)]
-#[command(name = "devbridge", version, about = "Huawei DevBridge CLI, rewritten in Rust")]
+#[command(
+    name = "devbridge",
+    version,
+    about = "Huawei DevBridge CLI, rewritten in Rust"
+)]
 struct Cli {
     #[arg(short, long, global = true)]
     verbose: bool,
@@ -263,16 +267,18 @@ async fn run() -> Result<()> {
             expiration,
             token,
             api_key,
-        } => run_host(
-            &settings,
-            tunnel_id,
-            ports,
-            description,
-            expiration,
-            token,
-            api_key,
-        )
-        .await,
+        } => {
+            run_host(
+                &settings,
+                tunnel_id,
+                ports,
+                description,
+                expiration,
+                token,
+                api_key,
+            )
+            .await
+        }
         Commands::Connect {
             tunnel_id,
             token,

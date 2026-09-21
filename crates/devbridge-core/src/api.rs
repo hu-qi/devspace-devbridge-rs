@@ -172,11 +172,8 @@ impl ApiClient {
     pub async fn show_port(&self, tunnel_id: &str, port: i32) -> Result<PortResult> {
         validate_tunnel_id(tunnel_id)?;
         validate_port(port)?;
-        self.json(self.request(
-            Method::GET,
-            &format!("/tunnels/{tunnel_id}/ports/{port}"),
-        ))
-        .await
+        self.json(self.request(Method::GET, &format!("/tunnels/{tunnel_id}/ports/{port}")))
+            .await
     }
 
     pub async fn create_port(
@@ -209,11 +206,8 @@ impl ApiClient {
         validate_tunnel_id(tunnel_id)?;
         validate_port(port)?;
         self.empty(
-            self.request(
-                Method::PUT,
-                &format!("/tunnels/{tunnel_id}/ports/{port}"),
-            )
-            .json(&UpdatePortRequest { allow_anonymous }),
+            self.request(Method::PUT, &format!("/tunnels/{tunnel_id}/ports/{port}"))
+                .json(&UpdatePortRequest { allow_anonymous }),
         )
         .await
     }
@@ -355,9 +349,7 @@ pub fn validate_tunnel_id(tunnel_id: &str) -> Result<()> {
     {
         Ok(())
     } else {
-        bail!(
-            "invalid tunnel id {tunnel_id:?}: expected 8 lowercase letters/base32 digits 2-7"
-        )
+        bail!("invalid tunnel id {tunnel_id:?}: expected 8 lowercase letters/base32 digits 2-7")
     }
 }
 
@@ -403,9 +395,7 @@ fn validate_tunnel_name(name: &str) -> Result<()> {
 }
 
 fn validate_tunnel_description(description: &str) -> Result<()> {
-    if description.chars().count() > 64
-        || !description.chars().all(allowed_name_edge)
-    {
+    if description.chars().count() > 64 || !description.chars().all(allowed_name_edge) {
         bail!("description supports up to 64 Chinese characters, letters or digits");
     }
     Ok(())

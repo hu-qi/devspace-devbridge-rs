@@ -124,8 +124,7 @@ pub async fn browser_login(settings: &Settings) -> Result<UserInfo> {
         }
     });
 
-    let mut login_url = Url::parse(&settings.login_url)?
-        .join("/space/devbridge/redirect")?;
+    let mut login_url = Url::parse(&settings.login_url)?.join("/space/devbridge/redirect")?;
     login_url
         .query_pairs_mut()
         .append_pair("origin", "devbridge")
@@ -148,7 +147,9 @@ pub async fn browser_login(settings: &Settings) -> Result<UserInfo> {
             envelope.error_msg
         );
     }
-    let result = envelope.result.context("login response did not contain credentials")?;
+    let result = envelope
+        .result
+        .context("login response did not contain credentials")?;
     if !verify_api_key(settings, &result.api_key).await? {
         bail!("login succeeded but API key verification failed");
     }

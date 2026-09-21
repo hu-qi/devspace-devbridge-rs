@@ -30,22 +30,20 @@ pub fn load() -> Result<AppConfig> {
     if !path.exists() {
         return Ok(AppConfig::default());
     }
-    let raw = fs::read_to_string(&path)
-        .with_context(|| format!("failed to read {}", path.display()))?;
-    serde_yaml::from_str(&raw)
-        .with_context(|| format!("failed to parse {}", path.display()))
+    let raw =
+        fs::read_to_string(&path).with_context(|| format!("failed to read {}", path.display()))?;
+    serde_yaml::from_str(&raw).with_context(|| format!("failed to parse {}", path.display()))
 }
 
 pub fn save(config: &AppConfig) -> Result<()> {
     let dir = config_dir()?;
-    fs::create_dir_all(&dir)
-        .with_context(|| format!("failed to create {}", dir.display()))?;
+    fs::create_dir_all(&dir).with_context(|| format!("failed to create {}", dir.display()))?;
     set_dir_permissions(&dir)?;
 
     let path = config_path()?;
     let raw = serde_yaml::to_string(config)?;
-    let mut file = fs::File::create(&path)
-        .with_context(|| format!("failed to create {}", path.display()))?;
+    let mut file =
+        fs::File::create(&path).with_context(|| format!("failed to create {}", path.display()))?;
     file.write_all(raw.as_bytes())?;
     file.sync_all()?;
     set_file_permissions(&path)?;

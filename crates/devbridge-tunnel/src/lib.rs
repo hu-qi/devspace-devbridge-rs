@@ -367,12 +367,9 @@ impl ForwardedConnection {
     }
 }
 
-async fn serve_relay(
-    stream: DuplexStream,
-    allowed_ports: Arc<RwLock<HashSet<u16>>>,
-) -> Result<()> {
-    let keypair = russh_keys::key::KeyPair::generate_ed25519()
-        .context("failed to create relay host key")?;
+async fn serve_relay(stream: DuplexStream, allowed_ports: Arc<RwLock<HashSet<u16>>>) -> Result<()> {
+    let keypair =
+        russh_keys::key::KeyPair::generate_ed25519().context("failed to create relay host key")?;
     let config = Arc::new(server::Config {
         connection_timeout: None,
         auth_rejection_time: Duration::from_millis(10),
@@ -525,8 +522,7 @@ async fn start_local_forward(
             };
             let session = session.clone();
             tokio::spawn(async move {
-                if let Err(error) =
-                    relay_local_connection(session, local, peer, remote_port).await
+                if let Err(error) = relay_local_connection(session, local, peer, remote_port).await
                 {
                     debug!(%error, remote_port, "forwarded connection ended");
                 }

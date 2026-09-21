@@ -68,7 +68,12 @@ fn runtime_or_build(name: &str, build_value: Option<&'static str>, fallback: &st
 
 fn env_flag(name: &str) -> bool {
     env::var(name)
-        .map(|value| matches!(value.to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on"))
+        .map(|value| {
+            matches!(
+                value.to_ascii_lowercase().as_str(),
+                "1" | "true" | "yes" | "on"
+            )
+        })
         .unwrap_or(false)
 }
 

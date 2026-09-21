@@ -30,13 +30,13 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Check
-        run: cargo check --workspace --all-targets --locked
+        run: cargo check --workspace --all-targets
 
       - name: Clippy
-        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+        run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Test
-        run: cargo test --workspace --all-targets --locked
+        run: cargo test --workspace --all-targets
 
   build:
     name: Build ${{ matrix.target }}
@@ -62,4 +62,4 @@ jobs:
         run: rustup target add ${{ matrix.target }}
 
       - name: Build
-        run: cargo build --locked --profile dist --target ${{ matrix.target }} -p devbridge
+        run: cargo build --profile dist --target ${{ matrix.target }} -p devbridge
