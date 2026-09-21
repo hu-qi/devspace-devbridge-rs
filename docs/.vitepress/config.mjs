@@ -10,6 +10,7 @@ const sidebar = [
       { text: "什么是开发隧道", link: "/guide/overview" },
       { text: "安装 DevBridge CLI", link: "/guide/install" },
       { text: "登录与凭证", link: "/guide/authentication" },
+      { text: "Rust 重构与开发", link: "/guide/rust-rewrite" },
     ],
   },
   {
@@ -39,6 +40,7 @@ const sidebar = [
     text: "参考",
     items: [
       { text: "CLI 命令参考", link: "/reference/cli" },
+      { text: "Rust CLI 参考", link: "/reference/rust-cli" },
       { text: "AI Agent Skill", link: "/reference/skill" },
       { text: "REST API", link: "/reference/api" },
       { text: "本地配置与目录", link: "/reference/configuration" },
