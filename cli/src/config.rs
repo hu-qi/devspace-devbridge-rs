@@ -67,10 +67,10 @@ pub fn api_key(override_key: Option<&str>) -> Result<String> {
     if let Some(key) = override_key.filter(|v| !v.is_empty()) {
         return Ok(key.to_owned());
     }
-    if let Ok(key) = std::env::var("DEVBRIDGE_API_KEY") {
-        if !key.is_empty() {
-            return Ok(key);
-        }
+    if let Ok(key) = std::env::var("DEVBRIDGE_API_KEY")
+        && !key.is_empty()
+    {
+        return Ok(key);
     }
     let cfg = load()?;
     cfg.credentials
