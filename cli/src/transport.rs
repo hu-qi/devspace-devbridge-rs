@@ -1,4 +1,8 @@
-use crate::{api::ApiClient, commands::{ConnectArgs, HostArgs}, config};
+use crate::{
+    api::ApiClient,
+    commands::{ConnectArgs, HostArgs},
+    config,
+};
 use anyhow::{Result, bail};
 
 /// Data-plane boundary for the relay protocol.
@@ -7,15 +11,24 @@ use anyhow::{Result, bail};
 /// reconnect policy and SSH port-forwarding. The Rust rewrite keeps the public CLI
 /// stable but isolates the transport so the relay protocol can evolve independently.
 pub async fn host(args: HostArgs, api_base: Option<&str>, cluster: Option<&str>) -> Result<()> {
-    let id = args.tunnel_id.or_else(|| config::default_tunnel().ok())
+    let id = args
+        .tunnel_id
+        .or_else(|| config::default_tunnel().ok())
         .ok_or_else(|| anyhow::anyhow!("tunnel ID is required"))?;
     let client = ApiClient::new(args.api_key.as_deref(), api_base, cluster)?;
     let ports = if args.ports.is_empty() {
-        client.list_ports(&id).await?.into_iter().map(|p| p.port).collect::<Vec<_>>()
+        client
+            .list_ports(&id)
+            .await?
+            .into_iter()
+            .map(|p| p.port)
+            .collect::<Vec<_>>()
     } else {
         args.ports
     };
-    if ports.is_empty() { bail!("no ports configured for tunnel {id}"); }
+    if ports.is_empty() {
+        bail!("no ports configured for tunnel {id}");
+    }
     let token = match args.token {
         Some(v) => v,
         None if args.api_key.is_some() => String::new(),
@@ -24,12 +37,25 @@ pub async fn host(args: HostArgs, api_base: Option<&str>, cluster: Option<&str>)
     run_relay("host", &id, &ports, &token).await
 }
 
-pub async fn connect(args: ConnectArgs, api_base: Option<&str>, cluster: Option<&str>) -> Result<()> {
-    let id = args.tunnel_id.or_else(|| config::default_tunnel().ok())
+pub async fn connect(
+    args: ConnectArgs,
+    api_base: Option<&str>,
+    cluster: Option<&str>,
+) -> Result<()> {
+    let id = args
+        .tunnel_id
+        .or_else(|| config::default_tunnel().ok())
         .ok_or_else(|| anyhow::anyhow!("tunnel ID is required"))?;
     let client = ApiClient::new(args.api_key.as_deref(), api_base, cluster)?;
-    let ports = client.list_ports(&id).await?.into_iter().map(|p| p.port).collect::<Vec<_>>();
-    if ports.is_empty() && args.token.is_none() { bail!("no ports configured for tunnel {id}"); }
+    let ports = client
+        .list_ports(&id)
+        .await?
+        .into_iter()
+        .map(|p| p.port)
+        .collect::<Vec<_>>();
+    if ports.is_empty() && args.token.is_none() {
+        bail!("no ports configured for tunnel {id}");
+    }
     let token = match args.token {
         Some(v) => v,
         None if args.api_key.is_some() => String::new(),

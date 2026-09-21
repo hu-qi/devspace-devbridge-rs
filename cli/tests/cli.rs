@@ -3,7 +3,8 @@ use predicates::prelude::*;
 
 #[test]
 fn prints_version() {
-    Command::cargo_bin("devbridge").unwrap()
+    Command::cargo_bin("devbridge")
+        .unwrap()
         .arg("version")
         .assert()
         .success()
@@ -12,7 +13,8 @@ fn prints_version() {
 
 #[test]
 fn help_lists_core_commands() {
-    Command::cargo_bin("devbridge").unwrap()
+    Command::cargo_bin("devbridge")
+        .unwrap()
         .arg("--help")
         .assert()
         .success()

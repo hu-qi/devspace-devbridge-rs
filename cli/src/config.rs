@@ -48,7 +48,9 @@ pub fn load() -> Result<AppConfig> {
 
 pub fn save(cfg: &AppConfig) -> Result<()> {
     let path = config_path()?;
-    let dir = path.parent().ok_or_else(|| anyhow!("invalid config path"))?;
+    let dir = path
+        .parent()
+        .ok_or_else(|| anyhow!("invalid config path"))?;
     fs::create_dir_all(dir)?;
     let data = serde_yaml::to_string(cfg)?;
     fs::write(&path, data)?;
@@ -78,9 +80,11 @@ pub fn api_key(override_key: Option<&str>) -> Result<String> {
 }
 
 pub fn default_tunnel() -> Result<String> {
-    load()?
-        .default_tunnel_id
-        .ok_or_else(|| anyhow!("tunnel ID not specified and no default tunnel set; use 'devbridge tunnel set <id>'"))
+    load()?.default_tunnel_id.ok_or_else(|| {
+        anyhow!(
+            "tunnel ID not specified and no default tunnel set; use 'devbridge tunnel set <id>'"
+        )
+    })
 }
 
 pub fn set_default_tunnel(id: Option<String>) -> Result<()> {

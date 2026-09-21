@@ -6,7 +6,11 @@ pub fn bytes(v: i64) -> String {
         n /= 1024.0;
         i += 1;
     }
-    if i == 0 { format!("{} {}", n as i64, UNITS[i]) } else { format!("{n:.1} {}", UNITS[i]) }
+    if i == 0 {
+        format!("{} {}", n as i64, UNITS[i])
+    } else {
+        format!("{n:.1} {}", UNITS[i])
+    }
 }
 
 pub fn kv(rows: &[(&str, String)]) {
