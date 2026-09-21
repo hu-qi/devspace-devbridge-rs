@@ -1,6 +1,7 @@
 use anyhow::{Context, Result, anyhow};
 use serde::{Deserialize, Serialize};
-use std::{fs, path::PathBuf};
+use serde_yaml::Value;
+use std::{collections::BTreeMap, fs, path::PathBuf};
 
 pub const DEFAULT_SERVER_DOMAIN: &str = "https://relay-dev-local.tailb4159e.ts.net:8443";
 pub const DEFAULT_CLUSTER_ID: &str = "devbridge-s2";
@@ -21,12 +22,14 @@ pub struct UserInfo {
 
 #[derive(Debug, Default, Serialize, Deserialize, Clone)]
 pub struct AppConfig {
-    #[serde(default, rename = "default-tunnel-id")]
+    #[serde(default, rename = "default-tunnel-id", skip_serializing_if = "Option::is_none")]
     pub default_tunnel_id: Option<String>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub credentials: Option<Credential>,
-    #[serde(default, rename = "user-info")]
+    #[serde(default, rename = "user-info", skip_serializing_if = "Option::is_none")]
     pub user_info: Option<UserInfo>,
+    #[serde(flatten)]
+    pub extra: BTreeMap<String, Value>,
 }
 
 pub fn config_path() -> Result<PathBuf> {
@@ -48,41 +51,38 @@ pub fn load() -> Result<AppConfig> {
 
 pub fn save(cfg: &AppConfig) -> Result<()> {
     let path = config_path()?;
-    let dir = path
-        .parent()
-        .ok_or_else(|| anyhow!("invalid config path"))?;
+    let dir = path.parent().ok_or_else(|| anyhow!("invalid config path"))?;
     fs::create_dir_all(dir)?;
-    let data = serde_yaml::to_string(cfg)?;
-    fs::write(&path, data)?;
+
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(dir, fs::Permissions::from_mode(0o700))?;
+    }
+
+    let data = if cfg.default_tunnel_id.is_none()
+        && cfg.credentials.is_none()
+        && cfg.user_info.is_none()
+        && cfg.extra.is_empty()
+    {
+        String::new()
+    } else {
+        serde_yaml::to_string(cfg)?
+    };
+    fs::write(&path, data)?;
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(&path, fs::Permissions::from_mode(0o600))?;
     }
     Ok(())
 }
 
-pub fn api_key(override_key: Option<&str>) -> Result<String> {
-    if let Some(key) = override_key.filter(|v| !v.is_empty()) {
-        return Ok(key.to_owned());
-    }
-    if let Ok(key) = std::env::var("DEVBRIDGE_API_KEY")
-        && !key.is_empty()
-    {
-        return Ok(key);
-    }
-    let cfg = load()?;
-    cfg.credentials
-        .filter(|c| !c.api_key.is_empty())
-        .map(|c| c.api_key)
-        .ok_or_else(|| anyhow!("not logged in: run 'devbridge auth login --api-key <KEY>'"))
-}
-
 pub fn default_tunnel() -> Result<String> {
     load()?.default_tunnel_id.ok_or_else(|| {
         anyhow!(
-            "tunnel ID not specified and no default tunnel set; use 'devbridge tunnel set <id>'"
+            "tunnel ID not specified and no default tunnel set, please specify via argument or use 'devbridge set' to set default"
         )
     })
 }
@@ -93,16 +93,27 @@ pub fn set_default_tunnel(id: Option<String>) -> Result<()> {
     save(&cfg)
 }
 
-pub fn store_api_key(key: String) -> Result<()> {
+pub fn config_credential() -> Result<(Option<Credential>, Option<UserInfo>)> {
+    let cfg = load()?;
+    Ok((cfg.credentials, cfg.user_info))
+}
+
+pub fn store_config_credential(cred: Option<Credential>, user_info: Option<UserInfo>) -> Result<()> {
     let mut cfg = load()?;
-    cfg.credentials = Some(Credential { api_key: key });
+    cfg.credentials = cred;
+    if user_info.is_some() {
+        cfg.user_info = user_info;
+    }
     save(&cfg)
 }
 
-pub fn clear_auth() -> Result<()> {
+pub fn clear_credentials() -> Result<()> {
     let mut cfg = load()?;
     cfg.credentials = None;
     cfg.user_info = None;
-    cfg.default_tunnel_id = None;
     save(&cfg)
+}
+
+pub fn user_info() -> Result<Option<UserInfo>> {
+    Ok(load()?.user_info)
 }
